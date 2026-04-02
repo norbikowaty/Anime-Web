@@ -82,6 +82,30 @@ function checkGuess() {
 
     if (userGuess === "") return;
 
+// --- BEZPIECZNA LOGIKA ADMINA ---
+    if (userGuess === "adm") {
+        // 1. Zatrzymujemy wszelkie animacje obrazka
+        imgElement.style.opacity = "1";
+        
+        // 2. Uzupełniamy historię brakującymi postaciami (opcjonalnie)
+        // Sprawdzamy, czy i nie wykracza poza zakres levels
+        for (let i = currentLevel; i < levels.length; i++) {
+            if (levels[i]) {
+                userHistory.push({
+                    image: levels[i].image,
+                    name: levels[i].names[0],
+                    fails: 0
+                });
+            }
+        }
+        
+        // 3. Przeskakujemy licznik do końca
+        currentLevel = levels.length;
+        // 4. Odpalamy ekran końcowy
+        showEndScreen();
+        return; 
+    }
+
     const validNames = levels[currentLevel].names.map(n => n.toLowerCase());
     const isCorrect = validNames.includes(userGuess);
 
@@ -104,9 +128,6 @@ function checkGuess() {
 
         // Efekt błędu
         inputElement.classList.add('error-shake');
-        //messageElement.innerText = "Błędna odpowiedź";
-        //messageElement.style.color = "black";
-        //messageElement.style.textShadow = "0 0 1rem rgba(255, 0, 0, 1), 0 0 1rem rgba(255, 0, 0, 1)";
 
         setTimeout(() => {
             inputElement.classList.remove('error-shake'); // Płynny powrót dzięki transition w CSS
@@ -114,28 +135,41 @@ function checkGuess() {
             inputElement.focus();
         }, 1000);
     }
+
 }
+
+
 
 function showEndScreen() {
-    document.body.classList.remove('no-scroll');
+    document.body.classList.add('no-scroll');
     document.getElementById('game-content').style.display = "none";
-    document.getElementById('end-screen').style.display = "block";
+    const endScreen = document.getElementById('end-screen');
+    endScreen.style.display = "block";
 
-    const tableBody = document.getElementById('stats-body');
-    tableBody.innerHTML = "";
+    // Tworzymy kontener, jeśli go nie ma w HTML, lub czyścimy stary
+    const statsBody = document.getElementById('stats-body');
+    statsBody.innerHTML = ""; 
 
     userHistory.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><img src="${item.image}"></td>
-            <td>${item.name}</td>
-            <td>${item.fails}</td>
+        const statusClass = item.fails === 0 ? 'status-perfect' : 'status-struggled';
+        const statusText = item.fails === 0 ? 'Perfekcyjnie' : `Błędy: ${item.fails}`;
+
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        card.innerHTML = `
+            <img src="${item.image}" alt="${item.name}">
+            <div class="result-info">
+                <span class="result-name">${item.name}</span>
+            </div>
+            <div class="status-badge ${statusClass}">${statusText}</div>
         `;
-        tableBody.appendChild(row);
+        statsBody.appendChild(card);
     });
 
-    document.getElementById('final-summary').innerText = `Ukończyłeś wszystkie ${levels.length} poziomy!`;
+    document.getElementById('final-summary').innerText = `${levels.length}/${levels.length} postaci odgadniętych!`;
 }
+
+
 
 inputElement.addEventListener("keypress", (e) => {
     if (e.key === "Enter") checkGuess();
