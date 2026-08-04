@@ -1,0 +1,12 @@
+ekran poczatkowy:
+    przycisk startowy, blur znak zapytania zamiast postaci
+
+sidebar menu:
+    wybor poziomu trudności
+    inne tryby:
+        po tytule 
+        zoom out jakiś
+
+theme button: 
+    nie dziala na mobilce - jak sie wpisze cos w input 
+    to wypierdala totalnie przycisk i go nie widac 
